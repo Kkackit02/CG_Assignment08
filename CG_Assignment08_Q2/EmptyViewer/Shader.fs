@@ -26,14 +26,17 @@ void main()
 
 vec4 Shading(vec3 wPosition, vec3 wNormal, vec3 wColor)
     {
-    vec3 N = normalize(wNormal);vec3 L;
-if (lightPos.w == 0.0) {
-    // directional light
-    L = normalize(-lightPos.xyz);  // 빛이 오는 방향이므로 반대 방향
-} else {
-    // point light
-    L = normalize(lightPos.xyz - wPosition);
-}
+    vec3 N = normalize(wNormal);
+    vec3 L;
+    if (lightPos.w == 0.0) 
+    {
+        // directional light
+        L = normalize(-lightPos.xyz);  // 빛이 오는 방향이므로 반대 방향
+    } 
+    else {
+        // point light
+        L = normalize(lightPos.xyz - wPosition);
+    }
     vec3 V = normalize(eyePos - wPosition);
     vec3 R = reflect(-L, N);
 

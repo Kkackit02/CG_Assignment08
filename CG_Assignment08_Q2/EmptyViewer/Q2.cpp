@@ -246,8 +246,11 @@ int main(int argc, char* argv[])
     // Initialize GLEW
     glewExperimental = true; // Needed for core profile
     if (glewInit() != GLEW_OK)
-        return -1;
-
+        return -1; 
+    
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK); // 기본값, 백페이스 제거
+    glFrontFace(GL_CCW); // 반시계방향이 앞면으로 취급됨
     // Enable depth test
     glEnable(GL_DEPTH_TEST);
     // Accept fragment if it is closer to the camera than the former one
@@ -273,8 +276,6 @@ int main(int argc, char* argv[])
     std::vector<unsigned int> Indices;
 
     load_mesh("bunny.obj"); 
-
-    
 
     for (size_t i = 0; i < gPositions.size(); ++i) {
         Positions.emplace_back(gPositions[i].x, gPositions[i].y, gPositions[i].z);
@@ -333,7 +334,7 @@ int main(int argc, char* argv[])
         glUniform1f(glGetUniformLocation(shaderProgram, "shininess"), shininess);
 
 
-        mat4 modeling = translate(mat4(10.0f), vec3(0.1f, -1.0f, -1.5f)) * scale(mat4(1.0f), vec3(10.0f));
+        mat4 modeling = translate(mat4(1.0f), vec3(0.1f, -1.0f, -1.5f)) * scale(mat4(1.0f), vec3(10.0f));
         mat4 modeling_inv_tr = transpose(inverse(modeling));
 
         vec3 eye = vec3(0, 0, 0);
@@ -365,7 +366,7 @@ int main(int argc, char* argv[])
         gTotalTimeElapsed += timeElapsed;
         float fps = gTotalFrames / gTotalTimeElapsed;
         char string[1024] = { 0 };
-        sprintf(string, "OpenGL Bunny: %0.2f FPS", fps);
+        sprintf(string, "OpenGL Bunny_Q2: %0.2f FPS", fps);
         glfwSetWindowTitle(window, string);
 
 

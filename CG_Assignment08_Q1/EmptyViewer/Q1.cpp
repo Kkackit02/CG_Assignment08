@@ -180,7 +180,7 @@ int main(int argc, char* argv[])
         gTotalTimeElapsed += timeElapsed;
         float fps = gTotalFrames / gTotalTimeElapsed;
         char string[1024] = { 0 };
-        sprintf(string, "OpenGL Bunny: %0.2f FPS", fps);
+        sprintf(string, "OpenGL Bunny_Q1: %0.2f FPS", fps);
         glfwSetWindowTitle(window, string);
 
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS ||
