@@ -1,4 +1,6 @@
-﻿#include <Windows.h>
+﻿
+#define _CRT_SECURE_NO_WARNINGS
+#include <Windows.h>
 #include <iostream>
 #include <vector>
 #include <cmath>
@@ -16,6 +18,37 @@ using namespace glm;
 int Width = 1280;
 int Height = 1280;
 
+
+float  					gTotalTimeElapsed = 0;
+int 					gTotalFrames = 0;
+GLuint 					gTimer;
+
+void init_timer()
+{
+    glGenQueries(1, &gTimer);
+}
+
+void start_timing()
+{
+    glBeginQuery(GL_TIME_ELAPSED, gTimer);
+}
+
+float stop_timing()
+{
+    glEndQuery(GL_TIME_ELAPSED);
+
+    GLint available = GL_FALSE;
+    while (available == GL_FALSE)
+        glGetQueryObjectiv(gTimer, GL_QUERY_RESULT_AVAILABLE, &available);
+
+    GLint result;
+    glGetQueryObjectiv(gTimer, GL_QUERY_RESULT, &result);
+
+    float timeElapsed = result / (1000.0f * 1000.0f * 1000.0f);
+    return timeElapsed;
+}
+
+
 struct Vertex {
     vec3 pos, normal;
 };
@@ -25,8 +58,8 @@ vector<int> gIndexBuffer;
 int gNumVertices = 0, gNumTriangles = 0;
 
 void render_immediate() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // Camera 설정
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -37,14 +70,14 @@ void render_immediate() {
     gluLookAt(0, 0, 0,   // eye
         0, 0, -1,  // center
         0, 1, 0);  // up
-
-    // 모델 변환: Translate 후 Scale
+    vec3 dir = normalize(vec3(1.0f, 1.0f, 1.0f));
+    //light Source = (-1,-1,-1) -> Direction to (1,1,1)
+    float lightDir[] = { dir.x, dir.y, dir.z, 0.0f };
+    glLightfv(GL_LIGHT0, GL_POSITION, lightDir);
     glTranslatef(0.1f, -1.0f, -1.5f);
     glScalef(10.0f, 10.0f, 10.0f);
 
     // Directional light 설정: (w = 0)
-    float position[] = { -1.0f, -1.0f, -1.0f, 0.0f };
-    glLightfv(GL_LIGHT0, GL_POSITION, position);
 
     glBegin(GL_TRIANGLES);
     for (int tri = 0; tri < gNumTriangles; ++tri) {
@@ -76,7 +109,7 @@ int main(int argc, char* argv[])
     if (!glfwInit())
         return -1;
 
-    window = glfwCreateWindow(Width, Height, "Immediate Mode - Bunny", NULL, NULL);
+    window = glfwCreateWindow(Width, Height, "CG Assignment08-Q1 - Bunny", NULL, NULL);
     if (!window) {
         glfwTerminate();
         return -1;
@@ -85,14 +118,17 @@ int main(int argc, char* argv[])
     glfwMakeContextCurrent(window);
     glewInit();
 
-    // 렌더링 설정
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE); // backface culling OFF
 
+
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
+    glEnable(GL_NORMALIZE);
 
-    float ambientLight[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+    float globalAmbient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globalAmbient);
+    float ambientLight[] = { 0.0f, 0.0f, 0.0f, 1.0f };
     float diffuseLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
     float specularLight[] = { 0.0f, 0.0f, 0.0f, 1.0f }; // no specular
 
@@ -103,12 +139,16 @@ int main(int argc, char* argv[])
     glEnable(GL_COLOR_MATERIAL);
     glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
     glColor3f(1.0f, 1.0f, 1.0f); // ka = kd = (1,1,1)
+    float matSpecular[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, matSpecular);
+    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 0.0f);  // p = 0
+
 
     glfwSetFramebufferSizeCallback(window, resize_callback);
     resize_callback(window, Width, Height);
 
     // load bunny
-    load_mesh("D:/GitClone/CG_Assignment08/CG_Assignment08_Q2/bunny.obj");
+    load_mesh("D:/Git/CG_Assignment08/CG_Assignment08_Q2/bunny.obj");
     gNumTriangles = gTriangles.size();
     gNumVertices = gPositions.size();
     gVertices.resize(gNumVertices);
@@ -125,12 +165,24 @@ int main(int argc, char* argv[])
         gIndexBuffer[i * 3 + 2] = gTriangles[i].indices[2];
     }
 
+    init_timer();
     // 메인 루프
     while (!glfwWindowShouldClose(window)) {
+
+		start_timing();
         render_immediate();
 
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+
+        float timeElapsed = stop_timing();
+        gTotalFrames++;
+        gTotalTimeElapsed += timeElapsed;
+        float fps = gTotalFrames / gTotalTimeElapsed;
+        char string[1024] = { 0 };
+        sprintf(string, "OpenGL Bunny: %0.2f FPS", fps);
+        glfwSetWindowTitle(window, string);
 
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS ||
             glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
