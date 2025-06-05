@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Main_Renderer.cpp">
+    <ClCompile Include="Q2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JungGeunnyeong\Downloads\load_mesh.cpp">
+    <ClCompile Include="load_mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -29,7 +29,6 @@
     <Text Include="Shader.vs">
       <Filter>Source Files</Filter>
     </Text>
-    <Text Include="c.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="load_mesh.h">
