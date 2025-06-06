@@ -3,6 +3,7 @@
 *.pqb
 *.pch
 *.obj
+!bunny.obj
 *.idb
 *.ipch
 *.tlog
